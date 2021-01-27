@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-downloader
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-downloader
+  template:
+    metadata:
+      labels:
+        app: youtube-downloader
+    spec:
+      containers:
+      - name: server
+        image: gabbersepp/youtube-download-server
+        volumeMounts:
+          - mountPath: /data
+            name: data
+            subPath: "Shared Music/Youtube"
+        ports:
+        - containerPort: 8081
+      - name: client
+        image: gabbersepp/youtube-download-client
+        ports:
+        - containerPort: 80
+      volumes:
+        - name: data
+          flexVolume:
+            driver: "fstab/cifs"
+            fsType: "cifs"
+            # secret only dummy - share is Public
+            secretRef:
+              name: "cifs-secret-private-cloud"
+            options:
+              networkPath: "//biehlercloud/Public"
+              mountOptions: ""
+        
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: youtube-download-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: youtube-downloader
+  ports:
+    - port: 80
+      name: web
+      targetPort: 80
+      nodePort: 30001
+    - port: 8081
+      name: api
+      targetPort: 8081
+      nodePort: 30002
