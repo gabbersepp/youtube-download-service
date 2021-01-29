@@ -5,26 +5,29 @@ function createProcess(cmd) {
        console.log("#######\r\nexecute command:\r\n\t" + cmd)
         let processEnded = false;
         const pr =  child_process.exec(cmd);
-    
+        let output = "";
+
         pr.stdout.on('data', data => {
             console.log(data.toString()); 
+            output += data.toString();
         });
     
         pr.stderr.on('data', data => {
             console.log(data.toString()); 
+            output += data.toString();
         });
     
         pr.on("close", () => {
             if (!processEnded) {
                 processEnded = true;
-                resolve()
+                resolve(output)
             }
         })
     
         pr.on("exit", () => {
             if (!processEnded) {
                 processEnded = true;
-                resolve()
+                resolve(output)
             }
         })
     

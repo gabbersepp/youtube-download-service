@@ -25,6 +25,10 @@ spec:
         image: gabbersepp/youtube-download-client
         ports:
         - containerPort: 80
+        volumeMounts:
+          - mountPath: /usr/share/nginx/html/config
+            name: clientconfig
+            subPath: youtube-downloader/client
       volumes:
         - name: data
           flexVolume:
@@ -35,6 +39,15 @@ spec:
               name: "cifs-secret-private-cloud"
             options:
               networkPath: "//biehlercloud/Public"
+              mountOptions: ""
+        - name: clientconfig
+          flexVolume:
+            driver: "fstab/cifs"
+            fsType: "cifs"
+            secretRef:
+              name: "cifs-secret"
+            options:
+              networkPath: "//192.168.2.126/sambashare"
               mountOptions: ""
         
 ---
