@@ -54,6 +54,20 @@ app.post("/process", async (req, res) => {
     res.json({ success: true, message: "Daten verarbeitet", processed: extractedVideos, failedSingleLinks, processedPlaylistUrls })
 })
 
+app.get('*', (req, res) => {
+    const url = req.originalUrl
+    const msg = `got unmatched route: ${url}`
+    console.log(msg)
+    res.send(msg)
+})
+
+app.post('*', (req, res) => {
+    const url = req.originalUrl
+    const msg = `got unmatched route: ${url}`
+    console.log(msg)
+    res.send(msg)
+})
+
 app.listen(port, () => console.log("listen on port " + port))
 
 function getExtractedVideos(output) {
