@@ -25,30 +25,12 @@ spec:
         image: gabbersepp/youtube-download-client
         ports:
         - containerPort: 80
-        volumeMounts:
-          - mountPath: /usr/share/nginx/html/config
-            name: clientconfig
-            subPath: youtube-downloader/client
       volumes:
         - name: data
-          flexVolume:
-            driver: "fstab/cifs"
-            fsType: "cifs"
-            # secret only dummy - share is Public
-            secretRef:
-              name: "cifs-secret-private-cloud"
-            options:
-              networkPath: "//biehlercloud/Public"
-              mountOptions: ""
-        - name: clientconfig
-          flexVolume:
-            driver: "fstab/cifs"
-            fsType: "cifs"
-            secretRef:
-              name: "cifs-secret"
-            options:
-              networkPath: "//192.168.2.126/sambashare"
-              mountOptions: ""
+          nfs:
+            server: 192.168.2.125
+            path: /nfs/Public
+            readOnly: false
 
 ---
 
@@ -70,26 +52,27 @@ spec:
 
 ---
 
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: youtube-downloader
   annotations:
-    kubernetes.io/ingress.class: nginx
-    #nginx.ingress.kubernetes.io/rewrite-target: /api
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-        rewrite /api/([^.]+)$ /$1 break;  
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/whitelist-source-range: 192.168.2.0/24
 spec:
   rules:
   - host: yt.h5b.de
     http:
       paths:
-      - path: /api/
+      - path: /api(/.*)
+        pathType: ImplementationSpecific
         backend:
-          serviceName: youtube-downloader
-          servicePort: api
+          service:
+            name: youtube-downloader
+            port: api
       - path: /
+        pathType: ImplementationSpecific
         backend:
-          serviceName: youtube-downloader
-          servicePort: web
+          service:
+            name: youtube-downloader
+            port: web
