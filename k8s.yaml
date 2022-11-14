@@ -69,10 +69,12 @@ spec:
         backend:
           service:
             name: youtube-downloader
-            port: api
+            port: 
+              name: api
       - path: /
         pathType: ImplementationSpecific
         backend:
           service:
             name: youtube-downloader
-            port: web
+            port: 
+              name: web
