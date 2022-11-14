@@ -43,16 +43,9 @@ export default class Home extends Vue  {
 
   private processResult = null;
 
-  private async getConfig() {
-    const response = await fetch("config/config.json");
-    const config = await response.json();
-    return config;
-  }
-
   private async process() {
     this.runningRequest = true;
-    const config = await this.getConfig();
-    const result = await fetch(`${config.baseUrl}/process`, {
+    const result = await fetch(`/api/process`, {
       method: "POST",
       headers: {
         'Content-Type': 'application/json'
